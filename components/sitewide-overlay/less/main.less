@@ -1,0 +1,134 @@
+@import (reference) "ui-framework-v1/less/main";
+
+// Pending Shrinkwrap
+// 1.0.3
+
+.img-frame > video {
+    min-width: 100%;
+}
+
+.blur {
+    -webkit-transition: -webkit-filter 2s ease;
+       -moz-transition: -moz-filter 2s ease;
+        -ms-transition: -ms-filter 2s ease;
+         -o-transition: -o-filter 2s ease;
+            transition: filter 2s ease;
+    .blur( 2px );
+}
+
+
+
+#sitewide-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+
+    width: 100%;
+    height: 100%;
+    padding: 0 @grid-gutter-width;
+
+    @media ( min-width: @screen-sm-min ) {
+        padding: 0 @grid-gutter-width-sm;
+    }
+
+    @media ( min-width: @screen-md-min ) {
+        padding: 0 @grid-gutter-width-md;
+    }
+
+    .backdrop {
+        position: absolute;
+        top: 0;
+        left: 0;
+
+        width: 100%;
+        height: 100%;
+
+        opacity: .5;
+        background-color: @core-architectural-1;
+
+        .transition( 2s );
+    }
+
+    .dialog {
+        position: relative;
+        top: 95px;
+
+        overflow: hidden;
+
+        transition: all .3s ease 0s;
+
+        color: @core-architectural-5;
+        a { color: @core-architectural-5 }
+
+        background-color: @core-architectural-1;
+        box-shadow: 0 0 5px 1px @core-architectural-1;
+
+        @media ( min-width: @screen-sm-min ) {
+            top: 115px;
+        }
+
+        @media ( min-width: @screen-md-min ) {
+            top: 164px;
+        }
+
+        > video,
+        > img {
+
+            position: absolute;
+            top: 50%;
+            left: 50%;
+
+            /* Trim sides if it has to */
+            width: auto;
+            height: 100%;
+
+            /* Trim top/bottom if it has to */
+            @media ( min-width: @screen-md-min ) {
+                width: 100%;
+                height: auto;
+            }
+
+            max-width: none;
+            max-height: none;
+            min-width: 100%;
+            min-height: 100%;
+
+            pointer-events: none;
+
+            -ms-interpolation-mode: bicubic;
+
+            -o-object-position: center;
+               object-position: center;
+
+            -o-object-fit: cover;
+               object-fit: cover;
+
+            .translate( -50% , -50% );
+
+            &::-webkit-media-controls-start-playback-button {
+                display: none !important;
+                -webkit-appearance: none;
+            }
+
+            + section {
+                opacity: .95;
+                background: transparent none;
+                color: @text-color-overlay;
+            }
+        }
+    }
+}
+.nav-promo ~ #sitewide-overlay {
+    .dialog {
+        top: 129px;
+
+        @media ( min-width: @screen-sm-min ) {
+            top: 169px;
+        }
+
+        @media ( min-width: @screen-md-min ) {
+            top: 228px;
+        }
+    }
+}
