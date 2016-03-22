@@ -2,8 +2,8 @@
 
 import _camelCase from 'lodash/camelCase';
 
-export default class JqueryProxy{
-    constructor ( config ) {
+export default class JqueryProxy {
+    constructor ( config = {} ) {
         if ( Array.isArray( config ) ) {
             config.forEach( elem => new JqueryProxy( elem ) );
         } else {
@@ -33,11 +33,40 @@ export default class JqueryProxy{
         return new JqueryProxy( children );
     }
 
-    data ( dataName ) {
-        return this.dataConfig[ _camelCase( dataName ) ];
+    after ( ) {
+        return this;
+    }
+
+    next ( ) {
+        return this;
+    }
+
+    data ( property, val ) {
+        if ( !val ) {
+            return this.dataConfig[ _camelCase( property ) ];
+        }
+        this.data[ property ] = val;
+
+        return this;
+    }
+
+    find ( ) {
+        return new JqueryProxy( );
     }
 
     detach ( ) {
+        return this;
+    }
+
+    focus ( ) {
+        return this;
+    }
+
+    keyup ( ) {
+        return this;
+    }
+
+    keydown ( ) {
         return this;
     }
 
@@ -49,6 +78,10 @@ export default class JqueryProxy{
         return this;
     }
 
+    has ( ) {
+        return this;
+    }
+
     replaceWith ( ) {
         return this;
     }
@@ -57,30 +90,65 @@ export default class JqueryProxy{
         return this.attrConfig[ attrName ];
     }
 
-    css ( property ) {
+    css ( property, val ) {
+        if ( !val ) {
+            return this.dataConfig[ _camelCase( property ) ];
+        }
+        this.css[ property ] = val;
+
         return this;
     }
 
     on ( action, callback ) {
         this.events[ action ] = () => callback;
+
         return this;
+    }
+
+    click ( callback ) {
+        return this.on( 'click', callback );
     }
 
     trigger ( action ) {
-        this.events[ action ]( );
-        return this;
-    }
-
-    addClass ( clss ) {
-        this.classList = this.classList || [];
-        this.classList.push( clss );
-        return this;
-    }
-
-    removeClass ( clss ) {
-        if ( this.classList.length ) {
-            this.classList.splice( this.classList.indexOf( clss ) );
+        if ( this.events[ action ] ) {
+            this.events[ action ]( );
         }
+
+        return this;
+    }
+
+    hasClass ( className ) {
+        return this.classList.contains( className );
+    }
+
+    addClass ( className ) {
+        this.classList = this.classList || [];
+        this.classList.push( className );
+
+        return this;
+    }
+
+    removeClass ( className ) {
+        if ( this.classList.length ) {
+            this.classList.splice( this.classList.indexOf( className ) );
+        }
+
+        return this;
+    }
+
+    toggleClass( className ) {
+        let classes = className.split( ' ' );
+
+        classes.forEach(
+            clss => {
+                if ( this.classList && this.classList.length && this.classList.indexOf( clss ) > -1 ) {
+                    return this.removeClass( clss );
+                }
+
+                return this.addClass( clss );
+            }
+        );
+
         return this;
     }
 

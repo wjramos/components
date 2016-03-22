@@ -5,7 +5,10 @@ import { stub, spy } from 'sinon';
 
 const expect = shim.expect;
 
-const componentsList = [ { name : 'test' } ];
+function TestComponent () {}
+TestComponent.prototype.getName = function ( ) {
+    return 'test';
+}
 
 let componentInitSpy = spy( );
 
@@ -13,14 +16,15 @@ const componentHooks = shim.init(
     'packages/component-hooks/js/main',
     {
         'packages/component-utils/js/componentInit' : componentInitSpy,
-        'components/sitewide-overlay/js/main': stub()
+        'components/sitewide-overlay/js/main': stub(),
+        'components/locate-me/js/main': stub()
     }
 ).default;
 
 /* Tests */
 describe( 'Component Hooks', ( ) => {
     beforeEach( ( ) => {
-        componentHooks( componentsList );
+        componentHooks( [ TestComponent ] );
     } );
 
     afterEach( ( ) => {
@@ -28,7 +32,7 @@ describe( 'Component Hooks', ( ) => {
     } );
 
     it( 'should call componentInit for every included component', () => {
-        expect( componentInitSpy.callCount ).to.eq( componentsList.length );
+        expect( componentInitSpy.callCount ).to.eq( 1 );
     } );
 
     it( 'should pass correctly formatted selector to componentInit', () => {

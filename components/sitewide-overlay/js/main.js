@@ -5,6 +5,7 @@ import isCrawler from 'packages/component-utils/js/isCrawler';
 import parseToMs from 'packages/component-utils/js/parseToMs';
 import hasReferrer from 'packages/component-utils/js/hasReferrer';
 import mediaSourceSwap from 'packages/component-utils/js/mediaSourceSwap';
+import trapTabKey from 'packages/component-utils/js/trapTabKey';
 import cc from 'cookie-cutter';
 
 import STRING from './strings';
@@ -12,11 +13,10 @@ import STRING from './strings';
 const DATA = STRING.DATA;
 const SELECTOR = STRING.SELECTOR;
 
-export default class SitewideOverlay {
+class SitewideOverlay {
     constructor ( element, win = windw ) {
-        let $ = $ || win.jQuery;
-
-        this.defaultName = STRING.defaultName;
+        const $ = $ || win.jQuery || require( 'jquery2' );
+        this.$document = $( win.document );
         this.shown;
         this.settings;
         this.$element;
@@ -26,7 +26,7 @@ export default class SitewideOverlay {
             let $element = this.$element = $( element );
 
             /* Get modal window */
-            let target = $element.data( DATA.target ) || '#sitewide-overlay';
+            let target  = $element.data( DATA.target ) || '#sitewide-overlay';
             let $target = this.$target = $( target );
 
             if ( $element && $target ) {
@@ -41,7 +41,7 @@ export default class SitewideOverlay {
     setup ( win = windw ) {
         const cookie = cc( win.document );
         let $element = this.$element;
-        let $target = this.$target;
+        let $target  = this.$target;
 
         /* Get cases where overlay shouldn't be shown */
         let cookieName      = $element.data( DATA.cookieName ) || 'seenOverlay';
@@ -61,7 +61,7 @@ export default class SitewideOverlay {
             this.shown = true;
 
             /* Set Cookie to prevent repeated views on consecutive visits */
-            cookie.set( settings.cookieName, true, { expires: settings.cookieExpire } );
+            cookie.set( settings.cookieName, true, { expires : settings.cookieExpire } );
 
             /* Place component inside of overlay */
             $element.detach().appendTo( $target.children( '.dialog' ) );
@@ -73,16 +73,16 @@ export default class SitewideOverlay {
     }
 
     show ( win = windw ) {
-        const settings     = this.settings;
-        let $elem          = this.$element;
-        let $target        = this.$target;
-        let $siblings      = $target.siblings();
+        const settings = this.settings;
+        let $elem      = this.$element;
+        let $target    = this.$target;
+        let $siblings  = $target.siblings();
 
         /* Prepare to show */
-        $target.addClass( 'fade out' ).removeClass( 'hidden' )
+        $target.toggleClass( 'fade out hidden' );
 
         /* Set data attribute for page view metrics */
-        $elem.data( DATA.shown, true );
+        $elem.data( DATA.shown, true ).removeClass( 'js-sitewide-overlay' );
 
         /* Set up media */
         mediaSourceSwap( $elem, win );
@@ -91,31 +91,48 @@ export default class SitewideOverlay {
         $target.on(
             'click',
             SELECTOR.closeTriggers,
-            () => {
-                $target.addClass('fade out' );
-                $siblings.removeClass( settings.backgroundEffect );
-
-                setTimeout(
-                    () => {
-                        $target.remove();
-                    },
-                    parseToMs( $target.css( 'transition-duration' ) )
-                );
-            }
+            () => this.hide()
         );
 
-        /* Display the Overlay */
+        /* Display the Overlay after specified time after document is ready */
         setTimeout(
             () => {
-                $target.addClass( 'in' ).removeClass( 'out' );
+                this.metrics();
+                $target.toggleClass( 'in out' );
+                this.$document.keydown(
+                    e => {
+                        if ( e.which === 9 ) {
+                            trapTabKey( $elem, e );
+                        }
+
+                        if ( e.which === 27 ) {
+                            e.preventDefault();
+                            return this.hide();
+                        }
+                    }
+                );
 
                 /* Add visual effect to background sibling elements */
-                $siblings.addClass( settings.backgroundEffect );
+                $siblings.toggleClass( settings.backgroundEffect );
             },
             parseToMs( settings.delay )
         );
 
         return this;
+    }
+
+    metrics ( win = windw ) {
+        /* Fire view metrics on display */
+        const metrics = require( 'components/metrics' );
+        let loadData = metrics.viewData || {};
+
+        /* TODO: Find a better way to specify these */
+        metrics.view( {
+            pageName        : 'email_signup_modal',
+            subSection1     : 'email',
+            templateType    : 'rei_commerce',
+            siteId          : 'rei'
+        } );
     }
 
     remove ( ) {
@@ -124,4 +141,25 @@ export default class SitewideOverlay {
         /* Remove overlay element */
         return this.$element.remove();
     }
+
+    hide ( ) {
+        const settings = this.settings;
+        let $elem      = this.$element;
+        let $target    = this.$target;
+        let $siblings  = $target.siblings();
+
+        $target.toggleClass( 'in out' );
+        $siblings.toggleClass( settings.backgroundEffect );
+
+        setTimeout(
+            () => {
+                $target.remove( );
+            },
+            parseToMs( $target.css( 'transition-duration' ) )
+        );
+    }
 }
+
+SitewideOverlay.prototype.name = 'SitewideOverlay';
+
+export default SitewideOverlay;

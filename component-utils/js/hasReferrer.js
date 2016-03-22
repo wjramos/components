@@ -1,7 +1,5 @@
 'use strict';
 
-import _some from 'lodash/some';
-import _isArray from 'lodash/isArray';
 import { win as windw } from 'rei-browser-shim';
 
 /**
@@ -12,11 +10,10 @@ import { win as windw } from 'rei-browser-shim';
  */
 export default function ( referrers, win = windw ) {
     if ( referrers ) {
-        referrers = !_isArray( referrers ) ? [ referrers ] : referrers;
+        referrers = !Array.isArray( referrers ) ? [ referrers ] : referrers;
 
         /* Referrer exists and has data */
-        return _some(
-            referrers,
+        return referrers.some(
             referrer => {
                 const refRegex = new RegExp( `(^|\\b|(https?:\/\/([^\/]+\\.)))${ referrer }(\/|\\b|$)`, 'ig' );
                 return win.document.referrer.match( refRegex );

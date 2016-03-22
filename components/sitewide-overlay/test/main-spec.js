@@ -27,6 +27,9 @@ let jqConfig = {
 const Overlay = shim.init( 'components/sitewide-overlay/js/main', {
     'packages/component-utils/js' : {
         'packages/component-utils/js/mediaSourceSwap': stub( ),
+        'components/metrics': {
+            view: stub( )
+        },
         'jquery2' : stub( )
     }
 } ).default;

@@ -3,7 +3,7 @@
 import JqueryProxy from './JqueryProxy';
 
 export default class WinProxy {
-    constructor ( config ) {
+    constructor ( config = {} ) {
         this.navigator = config.navigator ? {
             userAgent: config.navigator.userAgent || ''
         } : { userAgent: '' };
